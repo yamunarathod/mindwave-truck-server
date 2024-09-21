@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Players Info</title>
+  <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body styling */
+    body,
+    html {
+      height: 100%;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: url("/images/bg1.png");
+      /* Use the uploaded image */
+      background-size: cover;
+      /* Change this from 'cover' to 'contain' */
+      background-position: center;
+      background-repeat: no-repeat;
+      /* Prevent background from repeating */
+      overflow: hidden;
+    }
+
+    /* Container for the form */
+    .form-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      /* background-color: rgba(
+          255,
+          255,
+          255,
+          0.8
+        ); */
+      border-radius: 10px;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Title styling */
+    .form-title {
+      font-size: 16px;
+      color: #f5f5f5;
+      margin-bottom: 10px;
+      font-weight: bold;
+      display: flex;
+      justify-content: start;
+      align-items: start;
+      padding-left: 5px;
+    }
+
+    /* Input field styling */
+    .input-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 10px;
+      
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      padding-right: 40px;
+      /* Space for the indicator */
+      border-radius: 10px;
+      font-size: 18px;
+      box-sizing: border-box;
+      border: none;
+      outline: none;
+    }
+
+    /* Indicator inside input field */
+    .indicator {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      /* Positioning inside the input field */
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      background-color: grey;
+      /* Default color */
+      border-radius: 50%;
+    }
+
+    /* Submit Button with Animation */
+    .animated-button {
+      position: relative;
+      display: inline-block;
+      padding: 10px;
+      width: 100%;
+      font-size: 18px;
+      font-weight: bold;
+      color: #f5f5f5;
+      text-align: center;
+      border: 2px solid #00b894;
+      background-color: transparent;
+      cursor: pointer;
+      border-radius: 5px;
+      border: none;
+      overflow: hidden;
+      transition: color 0.4s ease;
+      background-color: #2c2c2c;
+      margin-top: 15px;
+    }
+
+    .animated-button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      height: 100%;
+      width: 0;
+      background-color: #00b894;
+      /* Fill color */
+      transition: width 0.4s ease-in-out, left 0.4s ease-in-out;
+      z-index: 0;
+    }
+
+    .animated-button:hover::before,
+    .animated-button:focus::before {
+      width: 100%;
+      left: 0;
+    }
+
+    .animated-button span {
+      position: relative;
+      z-index: 1;
+      /* Ensures text stays above the background */
+      color: #f5f5f5;
+      transition: color 0.4s ease-in-out;
+    }
+
+    .animated-button:hover span,
+    .animated-button:focus span {
+      color: #fff;
+      /* Text turns white to contrast with the background */
+    }
+
+    /* Toast message styling */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-size: 17px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+    }
+
+
+
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #stopGameBtn {
+      border: none;
+      margin-top: 50px;
+      color: #f5f5f5;
+    }
+
+    #returnHomeBtn {
+      background: #f5f5f5;
+      margin-top: 50px;
+      color: #2c2c2c;
+    }
+    .heading{
+      color: #f5f5f5;
+      font-size: 20px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="form-container" id="formScreen">
+    <h1 class="form-title">Enter player names</h1>
+
+    <!-- Input Field for Player 1 with Indicator -->
+    <div class="input-container">
+      <input type="text" class="form-input" id="player1" placeholder="Player 1 Name" maxlength="20" />
+      <div class="indicator" id="isOneActive"></div>
+      <!-- Indicator for Player 1 -->
+    </div>
+    <div class="input-container">
+      <input type="text" class="form-input" id="player2" placeholder="Player 2 Name" maxlength="20" />
+      <div class="indicator" id="isTwoActive"></div>
+      <!-- Indicator for Player 1 -->
+    </div>
+    <div class="input-container">
+      <input type="text" class="form-input" id="player3" placeholder="Player 3 Name" maxlength="20" />
+      <div class="indicator" id="isThreeActive"></div>
+      <!-- Indicator for Player 1 -->
+    </div>
+
+    <!-- Input Field for Player 2 with Indicator -->
+    <div class="input-container">
+      <input type="text" class="form-input" id="player4" placeholder="Player 4 Name" maxlength="20" />
+      <div class="indicator" id="isFourActive"></div>
+      <!-- Indicator for Player 2 -->
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="animated-button" id="submitBtn">
+      <span>Submit</span>
+    </button>
+  </div>
+
+  <div id="runningScreen" style="display: none">
+    <h1 class="heading">Experience is on the Way</h1>
+    <button id="stopGameBtn" class="animated-button">Restart</button>
+    <button id="returnHomeBtn" class="animated-button hidden">
+      Return Home
+    </button>
+  </div>
+
+  <!-- Toast Message -->
+  <div id="toast" class="toast">Toast Message</div>
+
+  <!-- Include Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io("http://192.168.1.68:3000"); // or io("http://192.168.1.177:3000");
+    //const socketTwo = io("http://192.168.1.101:3000");
+    const socketTwo = io("http://192.168.1.122:3000", {
+      transports: ["websocket"],
+      reconnectAttempts: 5,
+      timeout: 20000,
+    });
+    const socketThree = io("http://192.168.31.187:3000", {
+      transports: ["websocket"],
+      reconnectAttempts: 5,
+      timeout: 20000,
+    });
+    const socketFour = io("http://192.168.1.177:3000", {
+      transports: ["websocket"],
+      reconnectAttempts: 5,
+      timeout: 20000,
+    });
+
+    const submitBtn = document.getElementById("submitBtn");
+    const playerForm = document.getElementById("playerForm");
+
+    const formScreen = document.getElementById("formScreen");
+    const runningScreen = document.getElementById("runningScreen");
+
+    const isOneActive = document.getElementById("isOneActive");
+  const isTwoActive = document.getElementById("isTwoActive");
+  const isThreeActive = document.getElementById("isThreeActive");
+  const isFourActive = document.getElementById("isFourActive");
+
+    const toast = document.getElementById("toast");
+
+    // Function to show toast message with custom message and background color
+    function showToast(message, bgColor) {
+      toast.innerHTML = message;
+      toast.style.backgroundColor = bgColor;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000); // Toast message will disappear after 3 seconds
+    }
+
+    submitBtn.addEventListener("click", function (event) {
+      event.preventDefault(); // Prevent immediate form submission
+      submitBtn.classList.add("clicked"); // Trigger the animation
+
+      // Delay the data submission via socket by 0.5 seconds to let the animation play
+      setTimeout(() => {
+        const player1 = document.getElementById("player1").value;
+        const player2 = document.getElementById("player2").value;
+        const player3 = document.getElementById("player3").value;
+        const player4 = document.getElementById("player4").value;
+
+        // Emit the data to the server via Socket.IO
+        socket.emit("submit-players", { player1, player2, player3, player4 });
+
+        console.log("Players submitted via socket:", { player1, player2, player3, player4 });
+
+        // Show custom toast message on successful submission
+        showToast("Players Submitted Successfully!", "#28a745");
+      }, 500); // 500ms delay to match the animation time
+    });
+
+    // Socket listeners for meditation data
+    socket.on("meditation", (e) => {
+      if (e > 0) {
+        console.log("plater1: " + e);
+        isOneActive.style.backgroundColor = "#38EE64";
+        showToast("Player 1 is Meditating!", "green");
+      } else {
+        isOneActive.style.backgroundColor = "red";
+        showToast("Player 1 is Not Meditating", "#78FFE5");
+      }
+    });
+
+    socketTwo.on("meditation", (e) => {
+      if (e > 0) {
+        console.log("plater2: " + e);
+        isTwoActive.style.backgroundColor = "#38EE64";
+        showToast("Player 2 is Meditating!", "green");
+      } else {
+        isTwoActive.style.backgroundColor = "red";
+        showToast("Player 2 is Not Meditating", "#78FFE5");
+      }
+    });
+    socketThree.on("meditation", (e) => {
+
+      if (e > 0) {
+        console.log("Player 3: " + e);
+        isThreeActive.style.backgroundColor = "#38EE64";
+        showToast("Player 3 is Meditating!", "green");
+      } else {
+        isThreeActive.style.backgroundColor = "red";
+        showToast("Player 3 is Not Meditating", "#78FFE5");
+      }
+    });
+
+    // Handle Player 4 meditation status
+    socketFour.on("meditation", (e) => {
+
+      if (e > 0) {
+        console.log("Player 4: " + e);
+        isFourActive.style.backgroundColor = "#38EE64";
+        showToast("Player 4 is Meditating!", "green");
+      } else {
+        isFourActive.style.backgroundColor = "red";
+        showToast("Player 4 is Not Meditating", "#78FFE5");
+      }
+    });
+
+    // Example of receiving a response from the server
+    socket.on("startGame", (data) => {
+      formScreen.style.display = "none";
+      runningScreen.style.display = "block";
+      showToast("Game Started!", "#007bff");
+    });
+
+
+    const stopGameBtn=document.getElementById("stopGameBtn")
+
+    // Handle stop game button click
+    stopGameBtn.addEventListener("click", () => {
+      stopGameBtn.disabled = true;
+      stopGameBtn.classList.add("hidden");
+      returnHomeBtn.classList.remove("hidden");
+      console.log("sending r to server ")
+      showToast("Sent Value: r", "red");
+      setTimeout(()=>{
+        location.reload();
+      } ,5000)
+    });
+
+
+
+    // Function to toggle fullscreen mode
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => {
+          alert(`Error attempting to enable fullscreen mode: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Handle double-click for desktops
+    document.addEventListener("dblclick", toggleFullScreen);
+
+    // Handle double-tap for mobile devices
+    let lastTouch = 0;
+    document.addEventListener("touchstart", (event) => {
+      const currentTime = new Date().getTime();
+      const timeSinceLastTouch = currentTime - lastTouch;
+
+      if (timeSinceLastTouch < 500 && timeSinceLastTouch > 0) {
+        // This is a double-tap
+        toggleFullScreen();
+        event.preventDefault(); // Prevent zooming on double-tap
+      }
+      lastTouch = currentTime;
+    });
+  </script>
+</body>
+
+</html>

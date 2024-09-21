@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Main Screen with Bar Animation and Health Bar</title>
+  <style>
+    @font-face {
+      font-family: "customFont";
+      src: url("/images/HelveticaNeueBold.otf") format("opentype");
+    }
+
+    /* Fullscreen video styling */
+    #countdown-video,
+    #winner-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: none;
+    }
+
+    /* Ensures the main content fits the screen without scrollbar */
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      font-family: "customFont", serif;
+    }
+
+    #main-content {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    #background-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    #idle-content {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      background-image: url("/images/bg3.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .player-container {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3;
+      /* Optional padding to give some spacing */
+    }
+
+    .bar-video-container {
+      position: relative;
+      /* width: 165px;
+      height: 550px; */
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .health-bar-container {
+      width: 100px;
+      height: 320px;
+      background-color: transparent;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: center;
+      align-items: center;
+
+    }
+
+    .health-block {
+      width: 100%;
+      height: 10%;
+      background-color: #ddd;
+      margin-bottom: 2px;
+    }
+
+    .health-block {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .health-block-fill {
+      background-color: #00b68f;
+      height: 0%;
+      width: 100%;
+      transition: height 0.3s ease;
+      position: absolute;
+      bottom: 0;
+      /* Anchors the fill to the bottom */
+    }
+
+    .health-percentage {
+      font-size: 53px;
+      font-weight: bold;
+      color: #00b68f;
+      text-align: center;
+      /* margin-bottom: 160%; */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+
+
+
+
+
+    #winner-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("/images/LedScreen.png");
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    #winner-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 101;
+    }
+
+    #winner-screen h1 {
+      font-size: 34px;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      z-index: 102;
+      text-align: center;
+      margin-top: 25%;
+      text-transform: capitalize;
+    }
+
+    #winner-screen p {
+      text-align: center;
+      font-size: 84px;
+      background: linear-gradient(90deg, #FFFFFF 36%, #7AD6CD 68%, #AAD5FF 87%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      /* For Firefox */
+    }
+
+
+    .player1 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-direction: column;
+      width: 25%;
+      height: 100vh;
+
+
+
+    }
+
+    .player2 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-direction: column;
+      width: 25%;
+      height: 100vh;
+
+
+    }
+
+    .player3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-direction: column;
+      width: 25%;
+      height: 100vh;
+
+
+    }
+
+    .player4 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-direction: column;
+      width: 25%;
+      height: 100vh;
+
+
+    }
+
+    .player-name {
+      text-align: center;
+      width: 100%;
+      margin-top: 40%;
+      font-size: 30px;
+      color: white;
+
+
+    }
+
+    .health-percentage {
+      width: 100%;
+      margin-bottom: 60%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="idle-content"></div>
+
+  <!-- Countdown Video -->
+  <video id="countdown-video" style="display: none">
+    <source src="/images/count.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+  <audio id="audioElement" src="/images/celebrationAudio.mpeg"></audio>
+  <audio id="winnerAudioElement" src="/images/winnerAudio.mpeg"></audio>
+  <!-- Main Content (Background Image, Bar Animation, and Health Bars) -->
+  <div id="main-content">
+    <video id="background-video" autoplay muted loop>
+      <source src="/images/bgmain.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="player-container">
+      <!-- Player A -->
+
+      <div class="player1">
+        <!-- name  -->
+        <div class="player-name" id="playerName1">
+          <p>Player Name</p>
+        </div>
+
+        <!-- %%% -->
+        <div class="health-percentage" id="health-percentage-playerA">
+          <p>0%</p>
+        </div>
+
+        <!-- health bar -->
+        <div class="bar-video-container">
+          <div class="health-bar-container" id="health-bar-playerA">
+            <!-- Health blocks will go here -->
+          </div>
+        </div>
+
+
+      </div>
+
+      <div class="player2">
+        <!-- name  -->
+        <div class="player-name" id="playerName2">
+          <p>Player Name</p>
+        </div>
+
+        <!-- %%% -->
+        <div class="health-percentage" id="health-percentage-playerB">
+          <p>0%</p>
+        </div>
+
+        <!-- health bar -->
+        <div class="bar-video-container">
+          <div class="health-bar-container" id="health-bar-playerB">
+            <!-- Health blocks will go here -->
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- Player C -->
+      <div class="player3">
+        <!-- name  -->
+        <div class="player-name" id="playerName3">
+          <p>Player Name</p>
+        </div>
+
+        <!-- %%% -->
+        <div class="health-percentage" id="health-percentage-playerC">
+          <p>0%</p>
+        </div>
+
+        <!-- health bar -->
+        <div class="bar-video-container">
+          <div class="health-bar-container" id="health-bar-playerC">
+            <!-- Health blocks will go here -->
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- Player D -->
+      <div class="player4">
+        <!-- name  -->
+        <div class="player-name" id="playerName4">
+          <p>Player Name</p>
+        </div>
+
+        <!-- %%% -->
+        <div class="health-percentage" id="health-percentage-playerD">
+          <p>0%</p>
+        </div>
+
+        <!-- health bar -->
+        <div class="bar-video-container">
+          <div class="health-bar-container" id="health-bar-playerD">
+            <!-- Health blocks will go here -->
+          </div>
+        </div>
+
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+  <!-- Winner Screen -->
+  <div id="winner-screen" class="winner-screen" style="display: none">
+    <video id="winner-video" autoplay loop muted>
+      <source src="/images/congrates.webm" type="video/webm" />
+      Your browser does not support the video tag.
+    </video>
+    <h1>CONGRATULATIONS</h1>
+    <p>Player Name</p>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const countdownVideo = document.getElementById("countdown-video");
+    const mainContent = document.getElementById("main-content");
+    const idleContent = document.getElementById("idle-content");
+    const winnerScreen = document.getElementById("winner-screen");
+
+    const playerANameElement = document.getElementById("playerName1");
+    const playerBNameElement = document.getElementById("playerName2");
+    const playerCNameElement = document.getElementById("playerName3");
+    const playerDNameElement = document.getElementById("playerName4");
+
+    const audioElement = document.getElementById("audioElement");
+    const winnerAudioElement = document.getElementById("winnerAudioElement");
+
+    let audioContext, audioSource, stereoPanner;
+    let gameTimer; // To store the timer
+    let gameStartTime; // Store when the game started
+
+    const socket = io("http://192.168.1.68:3000"); // or io("http://192.168.1.177:3000");
+    const socketTwo = io("http://192.168.1.122:3000");
+    const socketThree = io("http://192.168.31.157:3000");
+    const socketFour = io("http://192.168.1.157:3000");
+
+    socket.on("startGame", function (data) {
+      // Set player names dynamically for the third screen
+      playerANameElement.textContent = data.player1;
+      playerBNameElement.textContent = data.player2;
+      playerCNameElement.textContent = data.player3;
+      playerDNameElement.textContent = data.player4;
+
+
+      // Hide idle screen and show countdown video
+      idleContent.style.display = "none";
+      countdownVideo.style.display = "block";
+
+      countdownVideo.play();
+
+    });
+
+    countdownVideo.onended = function () {
+      // Hide the countdown video and show the main content
+      countdownVideo.style.display = "none";
+      countdownVideo.hidden = true;
+      mainContent.style.display = "block";
+      
+      socket.emit("countdownEnd",'s');
+      console.log("sdfghjklkjhgsdfghjklkj");
+
+      isGameStarted = true;
+
+      if (!audioContext || audioContext.state === "suspended") {
+        setupAudioContext();
+        audioContext.resume();
+      }
+
+      // Start the game timer
+      gameStartTime = Date.now();
+      gameTimer = setInterval(function () {
+        const currentTime = Date.now();
+        const elapsedTime = Math.floor((currentTime - gameStartTime) / 1000); // in seconds
+        console.log("Game duration: " + elapsedTime + " seconds");
+      }, 1000); // Update timer every second
+    };
+
+    
+    // socket.on("restartApp", (data) => {
+    //   location.reload();
+    // });
+    // Function to dynamically generate blocks based on total blocks count
+    function generateHealthBlocks(containerId, totalBlocks) {
+      const healthContainer = document.getElementById(containerId);
+      healthContainer.innerHTML = "";
+
+      // Create and append blocks
+      for (let i = 0; i < totalBlocks; i++) {
+        const block = document.createElement("div");
+        block.classList.add("health-block");
+
+        const fill = document.createElement("div");
+        fill.classList.add("health-block-fill");
+
+        block.appendChild(fill);
+        healthContainer.appendChild(block);
+      }
+    }
+
+    // Function to update the health bar and percentage display
+    function updateHealth(
+      healthPercentage,
+      containerId,
+      percentageId,
+      totalBlocks
+    ) {
+      const blocks = document.querySelectorAll(
+        `#${containerId} .health-block`
+      );
+      const percentagePerBlock = 100 / totalBlocks;
+
+      blocks.forEach((block, index) => {
+        const blockFill = block.querySelector(".health-block-fill");
+        const startPercentage = index * percentagePerBlock;
+        const endPercentage = (index + 1) * percentagePerBlock;
+
+        if (healthPercentage >= endPercentage) {
+          blockFill.style.height = "100%";
+        } else if (healthPercentage >= startPercentage) {
+          const blockFillPercentage =
+            ((healthPercentage - startPercentage) / percentagePerBlock) * 100;
+          blockFill.style.height = `${blockFillPercentage}%`;
+        } else {
+          blockFill.style.height = "0%";
+        }
+      });
+
+      // Update the percentage text
+      document.getElementById(
+        percentageId
+      ).textContent = `${healthPercentage}%`;
+    }
+
+    // Function to generate a random number between 0 and 100
+    function getRandomPercentage() {
+      return Math.floor(Math.random() * 101);
+    }
+
+    // On page load
+    window.onload = function () {
+      const totalBlocks = 10;
+      generateHealthBlocks("health-bar-playerA", totalBlocks);
+      generateHealthBlocks("health-bar-playerB", totalBlocks);
+      generateHealthBlocks("health-bar-playerC", totalBlocks);
+      generateHealthBlocks("health-bar-playerD", totalBlocks);
+
+      // setInterval(function () {
+      //     const randomHealthA = getRandomPercentage();
+      //     const randomHealthB = getRandomPercentage();
+
+      //     updateHealth(randomHealthA, 'health-bar-playerA', 'health-percentage-playerA', totalBlocks);
+      //     updateHealth(randomHealthB, 'health-bar-playerB', 'health-percentage-playerB', totalBlocks);
+      // }, 1000);
+    };
+
+    function setupAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+        audioSource = audioContext.createMediaElementSource(audioElement);
+        stereoPanner = audioContext.createStereoPanner();
+        audioSource.connect(stereoPanner).connect(audioContext.destination);
+      }
+    }
+
+    function playAudio(panValue) {
+      setupAudioContext();
+      stereoPanner.pan.value = panValue; // -1 is left, 1 is right
+      audioElement.play();
+    }
+
+    let player1Value = 0;
+    let player2Value = 0;
+    let player3Value = 0;
+    let player4Value = 0;
+    let isGameStarted = false;
+    // Listen for Player 1's meditation data
+    socket.on("meditation", (e) => {
+      console.log(e, "data from server is coming")
+      if (!isGameStarted) return;
+
+      if (e > 0) {
+        updateHealth(
+          e,
+          "health-bar-playerA",
+          "health-percentage-playerA",
+          10
+        ); // Update Player 1's health
+        if (e == 100) {
+          playAudio(-1);
+        }
+      } else {
+        updateHealth(
+          0,
+          "health-bar-playerA",
+          "health-percentage-playerA",
+          10
+        ); // Reset Player 1's health
+      }
+      player1Value = e; // Store Player 1's value
+      sendPlayerValues();
+    });
+
+    // Listen for Player 2's meditation data
+    socketTwo.on("meditation", (e) => {
+      if (!isGameStarted) return;
+
+      if (e > 0) {
+        updateHealth(
+          e,
+          "health-bar-playerB",
+          "health-percentage-playerB",
+          10
+        ); // Update Player 2's health
+        if (e == 100) {
+          playAudio(1);
+        }
+      } else {
+        updateHealth(
+          0,
+          "health-bar-playerB",
+          "health-percentage-playerB",
+          10
+        ); // Reset Player 2's health
+      }
+      player2Value = e; // Store Player 2's value
+      sendPlayerValues();
+      // comparePlayerValues();
+    });
+
+    socketThree.on("meditation", (e) => {
+      if (!isGameStarted) return;
+
+      if (e > 0) {
+        updateHealth(
+          e,
+          "health-bar-playerC",
+          "health-percentage-playerC",
+          10
+        ); // Update Player 3's health
+        if (e == 100) {
+          playAudio(1);
+        }
+      } else {
+        updateHealth(
+          0,
+          "health-bar-playerC",
+          "health-percentage-playerC",
+          10
+        ); // Reset Player 3's health
+      }
+      player3Value = e; // Store Player 3's value
+      sendPlayerValues();
+      // comparePlayerValues();
+    });
+
+    socketFour.on("meditation", (e) => {
+      if (!isGameStarted) return;
+
+      if (e > 0) {
+        updateHealth(
+          e,
+          "health-bar-playerD",
+          "health-percentage-playerD",
+          10
+        ); // Update Player 4's health
+        if (e == 100) {
+          playAudio(1);
+        }
+      } else {
+        updateHealth(
+          0,
+          "health-bar-playerD",
+          "health-percentage-playerD",
+          10
+        ); // Reset Player 4's health
+      }
+      player4Value = e; // Store Player 4's value
+      sendPlayerValues();
+    });
+
+
+
+    function sendPlayerValues() {
+
+      let result; // Define the result variable
+
+      // Compare the values of Player 1 and Player 2
+      if (player1Value > 0 && player1Value<= 20) {
+        console.log(player1Value,"getting speed for a")
+        result = "a"; // Player 1 has a higher value
+      } else if (player1Value >= 20 && player1Value <= 40) {
+        console.log(player1Value,"getting speed for b")
+        result = "b"; // Player 2 has a higher value
+      } else if (player1Value >= 40 && player1Value <= 80) {
+        console.log(player1Value,"getting speed for c")
+        result = "c"; // Player 2 has a higher value
+      } else if (player1Value >= 80 && player1Value <= 100) {
+        result = "d"; // Player 2 has a higher value
+      }
+      console.log("player1:" + result);
+
+      console.log("datttaaaaaaaaaaaaaaaaaaaaaa")
+
+      // Emit the result to the server
+      socket.emit("speedSending", result);
+    }
+
+
+   
+
+    socket.on("winnerValueR", function (winner) {
+      console.log("winner valueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee " ,winner )
+      // Hide main content and show winner screen
+      mainContent.style.display = "none";
+      isGameStarted = false;
+      winnerAudioElement.play();
+      let winnerName;
+      if (winner == 1) {
+        winnerName = playerANameElement.textContent; // Player 1 is the winner
+      } else if (winner == 2) {
+        winnerName = playerBNameElement.textContent; // Player 2 is the winner
+      } else if (winner == 3) {
+        winnerName = playerCNameElement.textContent; // Player 3 is the winner
+      } else if (winner == 4) {
+        winnerName = playerDNameElement.textContent; // Player 4 is the winner
+      }
+      clearInterval(gameTimer);
+      const gameDuration = Math.floor((Date.now() - gameStartTime) / 1000); // in seconds
+
+
+      
+
+      // Emit data to server
+      socket.emit("gameResult", {
+        playerOneName: playerANameElement.textContent,
+        playerTwoName: playerBNameElement.textContent,
+        playerThreeName: playerCNameElement.textContent,
+        playerFourName: playerDNameElement.textContent,
+        winnerName: winnerName,
+        gameDuration: gameDuration + "sec",
+      });
+
+      winnerScreen.querySelector("p").textContent = `${winnerName}`;
+      winnerScreen.style.display = "block";
+
+      // After 10 seconds, show idle screen again
+      setTimeout(function () {
+        // countdownVideo.style.display = "none";
+        winnerScreen.style.display = "none";
+        idleContent.style.display = "block";
+        // location.reload();
+      }, 5000);
+    });
+
+
+ 
+
+
+  </script>
+  <!-- <script>
+        const countdownVideo = document.getElementById('countdown-video');
+        const mainContent = document.getElementById('main-content');
+        const idleContent = document.getElementById('idle-content');
+        const winnerScreen = document.getElementById('winner-screen');
+    
+        const playerANameElement = document.getElementById('playerName1');
+        const playerBNameElement = document.getElementById('playerName2');
+    
+        const socket = io();
+        const socketTwo = io("http://192.168.0.217:3000");
+    
+        let gameStarted = false; // Flag to control when the game has started
+        let gameTimer; // Variable to hold the 15-second timer
+    
+        socket.on('startGame', function(data) {
+            // Set player names dynamically for the third screen
+            playerANameElement.textContent = data.player1;
+            playerBNameElement.textContent = data.player2;
+    
+            // Hide idle screen and show countdown video
+            idleContent.style.display = 'none';
+            countdownVideo.style.display = 'block';
+        });
+    
+        countdownVideo.onended = function () {
+            // Hide the countdown video and show the main content
+            countdownVideo.style.display = 'none';
+            mainContent.style.display = 'block';
+    
+            // Set flag to true indicating the game has started
+            gameStarted = true;
+    
+            // Start the 15-second game timer
+            gameTimer = setTimeout(() => {
+                endGame(); // End the game after 15 seconds
+            }, 15000); // 15 seconds
+        };
+    
+        // Function to end the game
+        function endGame() {
+            // Disable main screen and show winner screen
+            mainContent.style.display = 'none';
+    
+            // Determine the winner based on higher meditation value
+            let winner;
+            if (player1Value > player2Value) {
+                winner = playerANameElement.textContent; // Player 1 is the winner
+            } else if (player2Value > player1Value) {
+                winner = playerBNameElement.textContent; // Player 2 is the winner
+            } else {
+                winner = 'It\'s a Tie!'; // It's a tie
+            }
+    
+            // Show the winner screen and display the winner
+            winnerScreen.querySelector('h1').textContent = `Congratulations! Winner: ${winner}`;
+            winnerScreen.style.display = 'block';
+    
+            // Set gameStarted flag to false and stop receiving meditation data
+            gameStarted = false;
+    
+            // Send result 'h' when the game has ended (indicating a halt)
+            socket.emit('result', 'h');
+    
+            // After 10 seconds, show idle screen again
+            setTimeout(function() {
+                winnerScreen.style.display = 'none';
+                idleContent.style.display = 'block';
+            }, 10000);
+        }
+    
+        socket.on('winnerValue', function(winner) {
+            // In case a manual winner is set (not used here, but keeping it for future use)
+            endGame();
+        });
+    
+        // Function to dynamically generate blocks based on total blocks count
+        function generateHealthBlocks(containerId, totalBlocks) {
+            const healthContainer = document.getElementById(containerId);
+            healthContainer.innerHTML = '';
+    
+            // Create and append blocks
+            for (let i = 0; i < totalBlocks; i++) {
+                const block = document.createElement('div');
+                block.classList.add('health-block');
+    
+                const fill = document.createElement('div');
+                fill.classList.add('health-block-fill');
+    
+                block.appendChild(fill);
+                healthContainer.appendChild(block);
+            }
+        }
+    
+        // Function to update the health bar and percentage display
+        function updateHealth(healthPercentage, containerId, percentageId, totalBlocks) {
+            const blocks = document.querySelectorAll(`#${containerId} .health-block`);
+            const percentagePerBlock = 100 / totalBlocks;
+    
+            blocks.forEach((block, index) => {
+                const blockFill = block.querySelector('.health-block-fill');
+                const startPercentage = index * percentagePerBlock;
+                const endPercentage = (index + 1) * percentagePerBlock;
+    
+                if (healthPercentage >= endPercentage) {
+                    blockFill.style.height = '100%';
+                } else if (healthPercentage >= startPercentage) {
+                    const blockFillPercentage = ((healthPercentage - startPercentage) / percentagePerBlock) * 100;
+                    blockFill.style.height = `${blockFillPercentage}%`;
+                } else {
+                    blockFill.style.height = '0%';
+                }
+            });
+    
+            // Update the percentage text
+            document.getElementById(percentageId).textContent = `${healthPercentage}%`;
+        }
+    
+        // On page load
+        window.onload = function () {
+            const totalBlocks = 10;
+            generateHealthBlocks('health-bar-playerA', totalBlocks);
+            generateHealthBlocks('health-bar-playerB', totalBlocks);
+        };
+    
+        let player1Value = 0;
+        let player2Value = 0;
+    
+        // Listen for Player 1's meditation data
+        socket.on("meditation", (e) => {
+            if (gameStarted) {  // Only process data after the game has started
+                if (e > 0) {
+                    updateHealth(e, 'health-bar-playerA', 'health-percentage-playerA', 10); // Update Player 1's health
+                } else {
+                    updateHealth(0, 'health-bar-playerA', 'health-percentage-playerA', 10); // Reset Player 1's health
+                }
+                player1Value = e; // Store Player 1's value
+                comparePlayerValues();
+            }
+        });
+    
+        // Listen for Player 2's meditation data
+        socketTwo.on("meditation", (e) => {
+            if (gameStarted) {  // Only process data after the game has started
+                if (e > 0) {
+                    updateHealth(e, 'health-bar-playerB', 'health-percentage-playerB', 10); // Update Player 2's health
+                } else {
+                    updateHealth(0, 'health-bar-playerB', 'health-percentage-playerB', 10); // Reset Player 2's health
+                }
+                player2Value = e; // Store Player 2's value
+                comparePlayerValues();
+            }
+        });
+    
+        // Function to compare both players' values and print the result
+        function comparePlayerValues() {
+            console.log('player1:' + player1Value + ' player2: ' + player2Value);
+    
+            let result; // Define the result variable
+    
+            // Compare the values of Player 1 and Player 2
+            if (player1Value > player2Value) {
+                result = 'a'; // Player 1 has a higher value
+            } else if (player1Value < player2Value) {
+                result = 'b'; // Player 2 has a higher value
+            } else {
+                result = 't'; // Both players have the same value
+            }
+    
+            // Emit the result to the server
+            socket.emit('result', result);
+        }
+    </script>    -->
+
+
+
+</body>
+
+</html>
